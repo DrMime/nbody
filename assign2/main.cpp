@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <GL/glu.h>
+#include <GL/gl.h>
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
@@ -17,11 +18,18 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgcodecs/imgcodecs.hpp"
 
-#include "sim.h"//my very own simulator uwu
+//#include "sim.h"//my very own simulator uwu
 
 #define PI 3.14159265
 #define WIDTH 100
 #define HEIGHT 100
+
+// start using this instead of your homemade vectors: cv::Vec3f testvector;
+cv::Mat3b text;
+cv::Mat3b background;
+
+unsigned int textTex;
+unsigned int backTex;
 
 int g_iMenuId;
 
@@ -38,6 +46,8 @@ CONTROLSTATE g_ControlState = ROTATE;
 float g_vLandRotate[3] = { 0.0, 0.0, 0.0 };
 float g_vLandTranslate[3] = { 0.0, 0.0, 0.0 };
 float g_vLandScale = 1.0;
+
+int readImage(char *filename, cv::Mat3b &image, bool displayOn);
 
 void myinit()
 {
@@ -56,19 +66,38 @@ int rastaMode = 1;
 void setupCamera() {
 	gluLookAt(0, 0, 100, 0, 0, 0, 1, 0, 0);
 }
+double angle = 0.0;
+float radius = 30.0;
 void displaybodies()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
 	setupCamera();
 	//draw here
+	//draw background
+	glBindTexture(GL_TEXTURE_2D, backTex);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 0.0); 
+	glVertex3f(-256.0, -256.0, -50);
+	glTexCoord2f(0.0, 1.0);
+	glVertex3f(-256.0,  256.0, -50);
+	glTexCoord2f(1.0, 0.0);
+	glVertex3f( 256.0, -256.0, -50);
+	glTexCoord2f(1.0, 1.0);
+	glVertex3f( 256.0,  256.0, -50);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
 
 	glColor3f(1, 1, 1);//rgb color
 	glTranslatef(0, 0, 0);//xyz coordinates
 	gluSphere(gluNewQuadric(), 5, 100, 20);//radius here is 5
-
 	glColor3f(0, 0, 1);
-	glTranslatef(0, 30, 0);
+	glTranslatef(radius*cos(angle), radius*sin(angle), 0);
+	angle += 0.01;
 	gluSphere(gluNewQuadric(), 2, 100, 20);
 
 	glPolygonMode(GL_FRONT_AND_BACK, modes[rastaMode]);
@@ -202,6 +231,20 @@ int main(int argc, char* argv[])
 {
 	//opening that window
 	glutInit(&argc, (char**)argv);
+
+	//read in the images
+	readImage("HololensFont.bmp", text, false);//displayOn = true
+	glGenTextures(1, &textTex);
+	glBindTexture(GL_TEXTURE_2D, textTex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, text.data);
+	readImage("nier background.png", background, false);
+	glGenTextures(1, &backTex);
+	glBindTexture(GL_TEXTURE_2D, backTex);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, text.data);
+
+
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
 	glEnable(GL_DEPTH_TEST);
 	glutInitWindowSize(512, 512);
@@ -209,7 +252,7 @@ int main(int argc, char* argv[])
 	glutCreateWindow("Jeffrey's N-body Simulator");
 
 	/* tells glut to use a particular display function to redraw */
-	glutDisplayFunc(displaybodies);//displaybodies for the bodies
+	glutDisplayFunc(displaybodies);
 	/* allow the user to quit using the right mouse button menu */
 	g_iMenuId = glutCreateMenu(menufunc);
 	glutSetMenu(g_iMenuId);
@@ -219,16 +262,28 @@ int main(int argc, char* argv[])
 	/* replace with any animate code */
 	glutIdleFunc(doIdle);
 
-	/* callback for mouse drags */
 	glutMotionFunc(mousedrag);
-	/* callback for idle mouse movement */
 	glutPassiveMotionFunc(mouseidle);
-	/* callback for mouse button changes */
 	glutMouseFunc(mousebutton);
 	glutKeyboardFunc(keystroke);
-	/* do initialization */
-	myinit();
 
+
+
+	myinit();
 	glutMainLoop();
 	return 0;
+}
+
+
+int readImage(char *filename, cv::Mat3b &image, bool displayOn) {
+	std::cout << "reading image : " << filename << std::endl;
+	image = cv::imread(filename);
+	if (!image.data) {
+		std::cout << "Could not open or find the image." << std::endl;
+		return 1;
+	}
+	if (displayOn) {
+		cv::imshow("TestWindow", image);
+		cv::waitKey(0); //press any key to exit
+	}
 }

@@ -101,6 +101,10 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="vec3.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="HololensFont.bmp" />
+    <Image Include="nier background.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
