@@ -9,12 +9,15 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/core/utility.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgcodecs/imgcodecs.hpp"
+
+#include "sim.h"//my very own simulator uwu
 
 #define PI 3.14159265
 #define WIDTH 100
@@ -201,8 +204,8 @@ int main(int argc, char* argv[])
 	glutInit(&argc, (char**)argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
 	glEnable(GL_DEPTH_TEST);
-	glutInitWindowSize(1000, 1000);
-	glutInitWindowPosition(500, 250);
+	glutInitWindowSize(512, 512);
+	glutInitWindowPosition(256, 256);
 	glutCreateWindow("Jeffrey's N-body Simulator");
 
 	/* tells glut to use a particular display function to redraw */
