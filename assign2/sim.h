@@ -1,4 +1,5 @@
 #include "body.h"
+#include <vector>
 
 class sim
 {
@@ -8,9 +9,9 @@ public:
 
 	void advance(float time);
 	int bodycount();
-	float** positions();
+	std::vector<std::pair<float, float>> positions();
 private:
-	int _numbodies;
-	body* bodies;
+	float gConst = 100.0;
+	std::vector<body> bodies;
 };
 

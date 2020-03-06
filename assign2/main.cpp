@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include "sim.h"
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/core/utility.hpp"
@@ -56,7 +57,7 @@ void myinit()
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 }
-
+sim mysim;
 GLint axis = 2;
 float theta[3] = { 0.0, 0.0, 0.0 };
 float heightcoefficient = 0.25;
@@ -68,6 +69,9 @@ void setupCamera() {
 }
 double angle = 0.0;
 float radius = 30.0;
+int steps = 0;
+int maxsteps = 10000;
+
 void displaybodies()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -75,32 +79,69 @@ void displaybodies()
 	setupCamera();
 	//draw here
 	//draw background
+	/*glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, backTex);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_CULL_FACE);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0, 0.0); 
 	glVertex3f(-256.0, -256.0, -50);
 	glTexCoord2f(0.0, 1.0);
 	glVertex3f(-256.0,  256.0, -50);
-	glTexCoord2f(1.0, 0.0);
-	glVertex3f( 256.0, -256.0, -50);
 	glTexCoord2f(1.0, 1.0);
 	glVertex3f( 256.0,  256.0, -50);
+	glTexCoord2f(1.0, 0.0);
+	glVertex3f( 256.0, -256.0, -50);
 	glEnd();
-	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);*/
+	glColor3f(0.5, 1.0, 0.5);
+	glBegin(GL_QUADS);
+	glVertex3f(-256.0, -256.0, -50);
+	glVertex3f(-256.0,  256.0, -50);
+	glVertex3f( 256.0,  256.0, -50);
+	glVertex3f( 256.0, -256.0, -50);
+	glEnd();
 
 
-	glColor3f(1, 1, 1);//rgb color
-	glTranslatef(0, 0, 0);//xyz coordinates
-	gluSphere(gluNewQuadric(), 5, 100, 20);//radius here is 5
-	glColor3f(0, 0, 1);
-	glTranslatef(radius*cos(angle), radius*sin(angle), 0);
-	angle += 0.01;
-	gluSphere(gluNewQuadric(), 2, 100, 20);
 
-	glPolygonMode(GL_FRONT_AND_BACK, modes[rastaMode]);
+
+
+	//glColor3f(1, 1, 1);//rgb color
+	//glTranslatef(0, 0, 0);//xyz coordinates
+	//gluSphere(gluNewQuadric(), 5, 100, 20);//radius here is 5
+	//glColor3f(0, 0, 1);
+	//glTranslatef(radius*cos(angle), radius*sin(angle), 0);
+	//angle += 0.001;
+	//gluSphere(gluNewQuadric(), 2, 100, 20);
+
+	angle += 0.001;
+	std::vector<std::pair<float, float>> testpos;
+	testpos.push_back(std::pair<float, float>(0.0, 0.0));
+	testpos.push_back(std::pair<float, float>(radius*cos(angle), radius*sin(angle)));
+
+	/*for (int i = 0; i < testpos.size(); i++) {
+		glTranslatef(testpos[i].first, testpos[i].second, 0);
+		if (i == 0) {
+			glColor3f(1, 01, 1);
+		}
+		else {
+			glColor3f(0, 0, 1);
+		}
+		gluSphere(gluNewQuadric(), 5, 100, 20);
+	}*/
+
+	if (steps++/* < maxsteps*/) {
+		mysim.advance(0.001);
+	}
+	std::vector<std::pair<float, float>> positions = mysim.positions();
+	std::vector<int> bodysizes = { 4, 2, 2, 2, 1, 1, 1 };
+	for (unsigned int i = 0; i < positions.size(); i++) {
+		//std::cout << "i = " << i << std::endl;
+		glColor3f(1, 0, 1);
+		//std::cout << "coordinates " << positions[i].second << " " << -positions[i].first << std::endl;
+		glTranslatef(positions[i].second, -positions[i].first, 0);
+		gluSphere(gluNewQuadric(), bodysizes[i], 100, 20);
+	}
+
+	//glPolygonMode(GL_FRONT_AND_BACK, modes[rastaMode]);
 	glutSwapBuffers();
 }
 
@@ -235,20 +276,21 @@ int main(int argc, char* argv[])
 	//read in the images
 	readImage("HololensFont.bmp", text, false);//displayOn = true
 	glGenTextures(1, &textTex);
+	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, text.data);
 	readImage("nier background.png", background, false);
 	glGenTextures(1, &backTex);
 	glBindTexture(GL_TEXTURE_2D, backTex);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, text.data);
-
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, background.data);
+	glDisable(GL_TEXTURE_2D);
 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
 	glEnable(GL_DEPTH_TEST);
 	glutInitWindowSize(512, 512);
-	glutInitWindowPosition(256, 256);
+	glutInitWindowPosition(128, 128);
 	glutCreateWindow("Jeffrey's N-body Simulator");
 
 	/* tells glut to use a particular display function to redraw */

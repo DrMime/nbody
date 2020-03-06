@@ -1,5 +1,5 @@
 #include "vec3.h"
-
+#include <iostream>
 
 
 vec3::vec3()
@@ -9,11 +9,6 @@ vec3::vec3()
 	z = 0;
 }
 
-vec3::vec3(vec3 &in) {
-	x = in.x;
-	y = in.y;
-	z = in.z;
-}
 
 vec3::vec3(float _X, float _y, float _z) 
 {
@@ -26,30 +21,30 @@ vec3::~vec3()
 {
 }
 
-vec3 operator+(vec3 &lhs, vec3 &rhs)
+vec3& vec3::operator+(vec3 &rhs)
 {
-	return vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+	return vec3(x + rhs.x, y + rhs.y, z + rhs.z);
 }
 
-vec3 operator-(vec3 &lhs, vec3 &rhs)
+vec3& vec3::operator-(vec3 &rhs)
 {
-	return vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+	return vec3(x - rhs.x, y - rhs.y, z - rhs.z);
 }
 
-vec3 operator*(vec3 &lhs, float &rhs)
+vec3& vec3::operator*(float rhs)
 {
-	return vec3(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
+	return vec3(x*rhs, y*rhs, z*rhs);
 }
 
-vec3 operator/(vec3 &lhs, float &rhs)
+vec3& vec3::operator/(float rhs)
 {
-	if (rhs == 0) { return lhs; }
-	return vec3(lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
+	if (rhs == 0) { return *this; }
+	return vec3(x / rhs, y / rhs, z / rhs);
 }
 
-float operator*(vec3 &lhs, vec3 &rhs)
+float vec3::operator*(vec3 &rhs)
 {
-	return (lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z);
+	return (x*rhs.x + y*rhs.y + z*rhs.z);
 }
 
 
@@ -67,4 +62,8 @@ float vec3::gety() {
 }
 float vec3::getz() {
 	return z;
+}
+
+void vec3::print() {
+	std::cout << "x " << x << " y " << y << std::endl;
 }
