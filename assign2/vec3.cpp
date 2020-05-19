@@ -4,9 +4,9 @@
 
 vec3::vec3()
 {
-	x = 0;
-	y = 0;
-	z = 0;
+	x = 0.0;
+	y = 0.0;
+	z = 0.0;
 }
 
 
@@ -23,6 +23,7 @@ vec3::~vec3()
 
 vec3& vec3::operator+(vec3 &rhs)
 {
+
 	return vec3(x + rhs.x, y + rhs.y, z + rhs.z);
 }
 

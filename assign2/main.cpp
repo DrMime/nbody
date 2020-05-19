@@ -129,7 +129,7 @@ void displaybodies()
 	}*/
 
 	if (steps++/* < maxsteps*/) {
-		mysim.advance(0.001);
+		mysim.advance(0.01);
 	}
 	std::vector<std::pair<float, float>> positions = mysim.positions();
 	std::vector<int> bodysizes = { 4, 2, 2, 2, 1, 1, 1 };

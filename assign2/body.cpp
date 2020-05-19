@@ -24,13 +24,18 @@ void body::increment(vec3 &force, float timestep) {
 	//std::cout << "increment with force ";
 	//force.print();
 	float temp = timestep / mass;
-	vec3 dv((force*temp).getx(), force.gety()*temp, (force*temp).getz());
+	vec3 dv((force).getx()*temp, force.gety()*temp, 0.0);
 	/*std::cout << "dv = ";
 	dv.print();*/
-	velocity = velocity + dv;
+	if (dv.norm() > velocity.norm()) {
+		velocity = dv + velocity;
+	}
+	else {
+		velocity = velocity + dv;
+	}
 	//std::cout << "newvel = ";
 	//velocity.print();
-	vec3 dr((velocity*timestep).getx(), velocity.gety()*timestep, (velocity*timestep).getz());
+	vec3 dr((velocity).getx()*timestep, velocity.gety()*timestep, 0.0);
 	if (dr.norm() > position.norm()) {
 		position = dr + position;
 	}
